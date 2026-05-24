@@ -1,4 +1,5 @@
 import {
+  boolean,
   integer,
   jsonb,
   pgEnum,
@@ -10,7 +11,7 @@ import {
 
 import { forms } from "./forms";
 
-export const fieldTypeEnum = pgEnum("field_type", [
+export const fieldTypePgEnum = pgEnum("field_type", [
   "short_text",
   "long_text",
   "email",
@@ -30,7 +31,7 @@ export const formFields = pgTable("form_fields", {
     })
     .notNull(),
 
-  type: fieldTypeEnum("type").notNull(),
+  type: fieldTypePgEnum("type").notNull(),
 
   label: text("label").notNull(),
 
@@ -38,7 +39,7 @@ export const formFields = pgTable("form_fields", {
 
   helperText: text("helper_text"),
 
-  required: text("required").default("false").notNull(),
+  required: boolean("required").default(false).notNull(),
 
   fieldOrder: integer("field_order").notNull(),
 

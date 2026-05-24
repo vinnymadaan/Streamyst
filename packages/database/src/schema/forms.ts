@@ -7,15 +7,16 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
+import { z } from "zod";
 
 import { users } from "./users";
 
-export const formVisibilityEnum = pgEnum("form_visibility", [
+export const formVisibilityPgEnum = pgEnum("form_visibility", [
   "public",
   "unlisted",
 ]);
 
-export const formStatusEnum = pgEnum("form_status", [
+export const formStatusPgEnum = pgEnum("form_status", [
   "draft",
   "published",
   "archived",
@@ -34,15 +35,11 @@ export const forms = pgTable("forms", {
 
   description: text("description"),
 
-  slug: text("slug").unique().notNull(),
+  slug: text("slug").notNull().unique(),
 
-  visibility: formVisibilityEnum("visibility")
-    .default("unlisted")
-    .notNull(),
+  visibility: formVisibilityPgEnum("visibility").default("unlisted").notNull(),
 
-  status: formStatusEnum("status")
-    .default("draft")
-    .notNull(),
+  status: formStatusPgEnum("status").default("draft").notNull(),
 
   theme: text("theme"),
 
@@ -58,4 +55,81 @@ export const forms = pgTable("forms", {
     .defaultNow()
     .$onUpdate(() => new Date())
     .notNull(),
+});
+
+export const fieldTypeEnum = z.enum([
+  "short_text",
+  "long_text",
+  "email",
+  "number",
+  "single_select",
+  "multi_select",
+  "rating",
+  "date",
+]);
+
+export const fieldSchema = z.object({
+  id: z.string().uuid().optional(),
+
+  type: fieldTypeEnum,
+
+  label: z.string().min(1).max(200),
+
+  placeholder: z.string().max(200).optional(),
+
+  helperText: z.string().max(500).optional(),
+
+  required: z.boolean(),
+
+  fieldOrder: z.number().int().min(0),
+
+  options: z.array(z.string()).optional(),
+
+  validation: z
+    .object({
+      minLength: z.number().optional(),
+      maxLength: z.number().optional(),
+      min: z.number().optional(),
+      max: z.number().optional(),
+      regex: z.string().optional(),
+    })
+    .optional(),
+});
+
+
+export const formVisibilityEnum = z.enum([
+  "public",
+  "unlisted",
+]);
+
+export const formStatusEnum = z.enum([
+  "draft",
+  "published",
+  "archived",
+]);
+
+export const createFormSchema = z.object({
+  title: z.string().min(3).max(200),
+
+  description: z.string().max(2000).optional(),
+
+  slug: z
+    .string()
+    .min(3)
+    .max(100)
+    .regex(/^[a-z0-9-]+$/),
+
+  visibility: formVisibilityEnum.default("unlisted"),
+
+  status: formStatusEnum.default("draft"),
+
+  theme: z.string().max(100).optional(),
+
+  isTemplate: z.boolean().default(false),
+
+  responseLimit: z.number().int().positive().optional(),
+
+  expiresAt: z.string().datetime().optional(),
+
+  fields: z.array(fieldSchema).min(1),
 });

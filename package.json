@@ -20,6 +20,8 @@
     "node": ">=18"
   },
   "dependencies": {
-    "dotenv-cli": "^11.0.0"
+    "dotenv": "^17.2.3",
+    "dotenv-cli": "^11.0.0",
+    "zod": "3.23.8"
   }
 }
