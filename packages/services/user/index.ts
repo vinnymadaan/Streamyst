@@ -35,6 +35,7 @@ class UserService {
     }
 
     return supportedAuthenticationProviders;
+    return []
   }
 
   public async authenticateWithGoogle(code: string) {

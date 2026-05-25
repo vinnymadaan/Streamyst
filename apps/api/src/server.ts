@@ -66,7 +66,7 @@ app.get("/auth/google/callback", async (req, res) => {
       },
     );
 
-    return res.redirect("http://localhost:3000");
+    return res.redirect("http://localhost:3000/dashboard")
   } catch (error) {
   console.error("GOOGLE CALLBACK ERROR:");
   console.error(error);

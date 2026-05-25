@@ -2,15 +2,17 @@ import type { CreateExpressContextOptions } from "@trpc/server/adapters/express"
 
 import { validateSession } from "@repo/services/src/auth/validate-session";
 
-export async function createContext({
-  req,
-  res,
-}: CreateExpressContextOptions): Promise<{
+type TRPCContext = {
   req: CreateExpressContextOptions["req"];
   res: CreateExpressContextOptions["res"];
   user: any;
   session: any;
-}> {
+};
+
+export const createContext = async ({
+  req,
+  res,
+}: CreateExpressContextOptions): Promise<TRPCContext> => {
   const sessionToken = req.cookies?.session_token;
 
   if (!sessionToken) {
@@ -39,6 +41,6 @@ export async function createContext({
     user: sessionData.user,
     session: sessionData,
   };
-}
+};
 
 export type Context = Awaited<ReturnType<typeof createContext>>;

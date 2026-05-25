@@ -2,8 +2,6 @@ import { eq, gt } from "drizzle-orm";
 
 import { db } from "@repo/database/src/client";
 
-import { sessions, users } from "@repo/database";
-
 export async function validateSession(sessionToken: string) {
   const session = await db.query.sessions.findFirst({
     where: (sessionsTable, { and }) =>
@@ -11,11 +9,14 @@ export async function validateSession(sessionToken: string) {
         eq(sessionsTable.sessionToken, sessionToken),
         gt(sessionsTable.expiresAt, new Date()),
       ),
-
-    with: {
-      user: true,
-    },
   });
 
-  return session;
+  if (!session) {
+    return null;
+  }
+
+  return {
+    ...session,
+    user: null,
+  };
 }

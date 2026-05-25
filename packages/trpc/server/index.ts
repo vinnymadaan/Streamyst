@@ -8,7 +8,7 @@ import { formsRouter } from "./routes/forms/routes";
 export const serverRouter = router({
   health: healthRouter,
   auth: authRouter,
-   forms: formsRouter,
+  forms: formsRouter,
 });
 
 export { createContext } from "./context";

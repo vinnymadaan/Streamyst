@@ -7,6 +7,15 @@ import { formFields } from "./form-fields";
 import { responses } from "./responses";
 import { responseAnswers } from "./response_answers";
 
+console.log({
+  users,
+  sessions,
+  forms,
+  formFields,
+  responses,
+  responseAnswers,
+});
+
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, {
     fields: [sessions.userId],

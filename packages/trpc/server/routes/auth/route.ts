@@ -8,7 +8,7 @@ import { generatePath } from "../../utils/path-generator";
 const TAGS = ["Authentication"];
 const getPath = generatePath("/authentication");
 
-export const authRouter = router({
+export const authRouter:any = router({
   getSupportedAuthenticationProviders: publicProcedure
     .input(zodUndefinedModel)
     .output(z.readonly(z.array(getAuthenticationMethodOutputSchema)))
