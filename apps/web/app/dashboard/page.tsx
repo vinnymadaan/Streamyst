@@ -52,7 +52,7 @@ export default function DashboardPage() {
 
               <div className="mt-4 flex gap-3">
                 <Link
-                  href={`/forms/${form.slug}`}
+                  href={`/f/${form.slug}`}
                   className="rounded-lg border px-4 py-2"
                 >
                   Open
