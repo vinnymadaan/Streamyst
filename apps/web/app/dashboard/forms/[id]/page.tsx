@@ -34,6 +34,11 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
   const createFieldMutation = trpc.forms.createField.useMutation({
     onSuccess: async () => {
       await utils.forms.getById.invalidate();
+      toast.success('Question added successfully!');
+    },
+    onError: (error) => {
+      console.error('CREATE FIELD ERROR:', error);
+      toast.error(error.message || 'Failed to add question');
     },
   });
 
@@ -41,29 +46,56 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
     onSuccess: async () => {
       await utils.forms.getById.invalidate();
     },
+    onError: (error) => {
+      console.error('UPDATE FIELD ERROR:', error);
+      toast.error(error.message || 'Failed to update question');
+    },
   });
 
   const deleteFieldMutation = trpc.forms.deleteField.useMutation({
     onSuccess: async () => {
       await utils.forms.getById.invalidate();
+      toast.success('Question deleted successfully!');
+    },
+    onError: (error) => {
+      console.error('DELETE FIELD ERROR:', error);
+      toast.error(error.message || 'Failed to delete question');
     },
   });
 
   const togglePublishMutation = trpc.forms.togglePublish.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       await utils.forms.getById.invalidate();
+      toast.success(
+        data?.status === 'published'
+          ? 'Form published successfully!'
+          : 'Form unpublished successfully!'
+      );
+    },
+    onError: (error) => {
+      console.error('TOGGLE PUBLISH ERROR:', error);
+      toast.error(error.message || 'Failed to update publish status');
     },
   });
 
   const updateFormMutation = trpc.forms.update.useMutation({
     onSuccess: async () => {
       await utils.forms.getById.invalidate();
+      toast.success('Form updated successfully!');
+    },
+    onError: (error) => {
+      console.error('UPDATE FORM ERROR:', error);
+      toast.error(error.message || 'Failed to update form');
     },
   });
 
   const deleteFormMutation = trpc.forms.delete.useMutation({
     onSuccess: async () => {
       window.location.href = '/dashboard';
+    },
+    onError: (error) => {
+      console.error('DELETE FORM ERROR:', error);
+      toast.error(error.message || 'Failed to delete form');
     },
   });
 

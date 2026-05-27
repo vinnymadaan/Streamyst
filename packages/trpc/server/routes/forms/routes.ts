@@ -69,7 +69,15 @@ export const formsRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      return createField(input, ctx.user.id);
+      try {
+        return await createField(input, ctx.user.id);
+      } catch (error) {
+        console.error('CREATE FIELD ERROR:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to create field',
+        });
+      }
     }),
   updateField: protectedProcedure
     .input(
@@ -83,7 +91,15 @@ export const formsRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      return updateField(input, ctx.user.id);
+      try {
+        return await updateField(input, ctx.user.id);
+      } catch (error) {
+        console.error('UPDATE FIELD ERROR:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to update field',
+        });
+      }
     }),
   deleteField: protectedProcedure
     .input(
@@ -92,7 +108,15 @@ export const formsRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      return deleteField(input.fieldId, ctx.user.id);
+      try {
+        return await deleteField(input.fieldId, ctx.user.id);
+      } catch (error) {
+        console.error('DELETE FIELD ERROR:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to delete field',
+        });
+      }
     }),
   getBySlug: publicProcedure
     .input(
@@ -132,7 +156,15 @@ export const formsRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      return toggleFormPublish(input.formId, ctx.user.id);
+      try {
+        return await toggleFormPublish(input.formId, ctx.user.id);
+      } catch (error) {
+        console.error('TOGGLE PUBLISH ERROR:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to toggle publish status',
+        });
+      }
     }),
   getMine: protectedProcedure.query(async ({ ctx }) => {
     try {
@@ -162,7 +194,15 @@ export const formsRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      return updateForm(input, ctx.user.id);
+      try {
+        return await updateForm(input, ctx.user.id);
+      } catch (error) {
+        console.error('UPDATE FORM ERROR:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to update form',
+        });
+      }
     }),
   delete: protectedProcedure
     .input(
@@ -171,6 +211,14 @@ export const formsRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      return deleteForm(input.formId, ctx.user.id);
+      try {
+        return await deleteForm(input.formId, ctx.user.id);
+      } catch (error) {
+        console.error('DELETE FORM ERROR:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to delete form',
+        });
+      }
     }),
 });
