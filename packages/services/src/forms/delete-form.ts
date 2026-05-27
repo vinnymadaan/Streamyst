@@ -4,13 +4,9 @@ import { db } from '@repo/database/src/client';
 
 import { forms } from '@repo/database/src/schema/forms';
 
-export async function getFormById(formId: string, userId: string) {
+export async function deleteForm(formId: string, userId: string) {
   const form = await db.query.forms.findFirst({
     where: eq(forms.id, formId),
-
-    with: {
-      fields: true,
-    },
   });
 
   if (!form) {
@@ -21,5 +17,9 @@ export async function getFormById(formId: string, userId: string) {
     throw new Error('Unauthorized');
   }
 
-  return form;
+  await db.delete(forms).where(eq(forms.id, formId));
+
+  return {
+    success: true,
+  };
 }

@@ -37,6 +37,30 @@ app.get("/health", (req, res) => {
 
 logger.debug(`openapi.json: ${env.BASE_URL}/openapi.json`);
 
+app.get('/auth/google', async (req, res) => {
+  const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
+
+  const options = {
+    redirect_uri: env.GOOGLE_OAUTH_REDIRECT_URI,
+
+    client_id: env.GOOGLE_OAUTH_CLIENT_ID,
+
+    access_type: 'offline',
+
+    response_type: 'code',
+
+    prompt: 'consent',
+
+    scope: [
+      'https://www.googleapis.com/auth/userinfo.profile',
+      'https://www.googleapis.com/auth/userinfo.email',
+    ].join(' '),
+  };
+
+  const qs = new URLSearchParams(options);
+
+  return res.redirect(`${rootUrl}?${qs.toString()}`);
+});
 
 app.get("/auth/google/callback", async (req, res) => {
   try {
