@@ -9,8 +9,22 @@ interface UpdateFieldInput {
 
   label?: string;
 
-  type?: 'short_text' | 'long_text' | 'email' | 'number';
+  type?:
+    | 'short_text'
+    | 'long_text'
+    | 'email'
+    | 'number'
+    | 'single_select'
+    | 'multi_select'
+    | 'rating'
+    | 'date';
   required?: boolean;
+
+  options?: string[] | null;
+
+  placeholder?: string | null;
+
+  helperText?: string | null;
 }
 
 export async function updateField(input: UpdateFieldInput, userId: string) {
@@ -38,6 +52,12 @@ export async function updateField(input: UpdateFieldInput, userId: string) {
       type: input.type,
 
       required: input.required,
+
+      options: input.options,
+
+      placeholder: input.placeholder,
+
+      helperText: input.helperText,
     })
     .where(eq(formFields.id, input.fieldId))
     .returning();

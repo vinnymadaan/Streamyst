@@ -190,8 +190,8 @@ export default function PublicFormPage({ params }: PublicFormPageProps) {
                   <div className="mt-6">
                     {field.type === 'short_text' && (
                       <input
-                        value={answers[field.id] ?? ''}
-                        onChange={(e) => handleChange(field.id, e.target.value)}
+                        value={answers[field.id ?? ''] ?? ''}
+                        onChange={(e) => handleChange(field.id ?? '', e.target.value)}
                         type="text"
                         placeholder={field.placeholder ?? 'Type your answer...'}
                         className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 text-lg outline-none transition focus:border-orange-500 dark:border-zinc-800 dark:bg-zinc-950"
@@ -200,8 +200,8 @@ export default function PublicFormPage({ params }: PublicFormPageProps) {
 
                     {field.type === 'email' && (
                       <input
-                        value={answers[field.id] ?? ''}
-                        onChange={(e) => handleChange(field.id, e.target.value)}
+                        value={answers[field.id ?? ''] ?? ''}
+                        onChange={(e) => handleChange(field.id ?? '', e.target.value)}
                         type="email"
                         placeholder={field.placeholder ?? 'Enter your email...'}
                         className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 text-lg outline-none transition focus:border-orange-500 dark:border-zinc-800 dark:bg-zinc-950"
@@ -210,8 +210,8 @@ export default function PublicFormPage({ params }: PublicFormPageProps) {
 
                     {field.type === 'long_text' && (
                       <textarea
-                        value={answers[field.id] ?? ''}
-                        onChange={(e) => handleChange(field.id, e.target.value)}
+                        value={answers[field.id ?? ''] ?? ''}
+                        onChange={(e) => handleChange(field.id ?? '', e.target.value)}
                         placeholder={
                           field.placeholder ?? 'Write your response...'
                         }
@@ -221,11 +221,112 @@ export default function PublicFormPage({ params }: PublicFormPageProps) {
 
                     {field.type === 'number' && (
                       <input
-                        value={answers[field.id] ?? ''}
-                        onChange={(e) => handleChange(field.id, e.target.value)}
+                        value={answers[field.id ?? ''] ?? ''}
+                        onChange={(e) => handleChange(field.id ?? '', e.target.value)}
                         type="number"
                         placeholder="0"
                         className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 text-lg outline-none transition focus:border-orange-500 dark:border-zinc-800 dark:bg-zinc-950"
+                      />
+                    )}
+
+                    {field.type === 'single_select' && (
+                      <div className="flex flex-col gap-3">
+                        {((field.options as string[] | undefined) ?? ['Option 1', 'Option 2']).map((option, oIdx) => {
+                          const isSelected = answers[field.id ?? ''] === option;
+                          return (
+                            <button
+                              key={oIdx}
+                              type="button"
+                              onClick={() => handleChange(field.id ?? '', option)}
+                              className={`flex items-center justify-between w-full rounded-2xl border px-6 py-4 text-left transition select-none cursor-pointer ${
+                                isSelected
+                                  ? 'border-orange-500 bg-orange-500/5 text-orange-600 dark:text-orange-400'
+                                  : 'border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900'
+                              }`}
+                            >
+                              <span className="text-lg font-medium">{option}</span>
+                              <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center ${
+                                isSelected ? 'border-orange-500 bg-orange-500' : 'border-zinc-300 dark:border-zinc-700'
+                              }`}>
+                                {isSelected && <div className="h-2.5 w-2.5 rounded-full bg-white" />}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {field.type === 'multi_select' && (
+                      <div className="flex flex-col gap-3">
+                        {((field.options as string[] | undefined) ?? ['Option 1', 'Option 2']).map((option, oIdx) => {
+                          const fieldId = field.id ?? '';
+                          const currentAnswers = answers[fieldId] ? answers[fieldId].split(', ') : [];
+                          const isSelected = currentAnswers.includes(option);
+                          
+                          const handleToggle = () => {
+                            let newAnswers: string[];
+                            if (isSelected) {
+                              newAnswers = currentAnswers.filter(item => item !== option);
+                            } else {
+                              newAnswers = [...currentAnswers, option];
+                            }
+                            handleChange(fieldId, newAnswers.join(', '));
+                          };
+
+                          return (
+                            <button
+                              key={oIdx}
+                              type="button"
+                              onClick={handleToggle}
+                              className={`flex items-center justify-between w-full rounded-2xl border px-6 py-4 text-left transition select-none cursor-pointer ${
+                                isSelected
+                                  ? 'border-orange-500 bg-orange-500/5 text-orange-600 dark:text-orange-400'
+                                  : 'border-zinc-200 bg-zinc-50 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900'
+                              }`}
+                            >
+                              <span className="text-lg font-medium">{option}</span>
+                              <div className={`h-6 w-6 rounded-md border-2 flex items-center justify-center transition ${
+                                isSelected ? 'border-orange-500 bg-orange-500 text-white' : 'border-zinc-300 dark:border-zinc-700'
+                              }`}>
+                                {isSelected && (
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                  </svg>
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {field.type === 'rating' && (
+                      <div className="flex items-center gap-3 py-2">
+                        {[1, 2, 3, 4, 5].map((stars) => {
+                          const currentRating = parseInt(answers[field.id ?? ''] ?? '0');
+                          const isHighlighted = stars <= currentRating;
+                          return (
+                            <button
+                              key={stars}
+                              type="button"
+                              onClick={() => handleChange(field.id ?? '', stars.toString())}
+                              className="text-5xl focus:outline-none transition-all hover:scale-125 select-none cursor-pointer"
+                            >
+                              <span className={isHighlighted ? 'text-orange-500' : 'text-zinc-300 dark:text-zinc-700'}>
+                                ★
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {field.type === 'date' && (
+                      <input
+                        value={answers[field.id ?? ''] ?? ''}
+                        onChange={(e) => handleChange(field.id ?? '', e.target.value)}
+                        type="date"
+                        className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 text-lg outline-none transition focus:border-orange-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
                       />
                     )}
                   </div>

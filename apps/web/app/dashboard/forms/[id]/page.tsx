@@ -343,7 +343,11 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
                               | 'short_text'
                               | 'long_text'
                               | 'email'
-                              | 'number',
+                              | 'number'
+                              | 'single_select'
+                              | 'multi_select'
+                              | 'rating'
+                              | 'date',
                           });
                         }}
                       >
@@ -355,31 +359,93 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
                           <SelectItem value="long_text" className="rounded-xl px-4 py-3 text-sm focus:bg-zinc-100 dark:focus:bg-zinc-900 cursor-pointer text-zinc-950 dark:text-zinc-50 focus:text-zinc-950 dark:focus:text-zinc-50">Long Text</SelectItem>
                           <SelectItem value="email" className="rounded-xl px-4 py-3 text-sm focus:bg-zinc-100 dark:focus:bg-zinc-900 cursor-pointer text-zinc-950 dark:text-zinc-50 focus:text-zinc-950 dark:focus:text-zinc-50">Email</SelectItem>
                           <SelectItem value="number" className="rounded-xl px-4 py-3 text-sm focus:bg-zinc-100 dark:focus:bg-zinc-900 cursor-pointer text-zinc-950 dark:text-zinc-50 focus:text-zinc-950 dark:focus:text-zinc-50">Number</SelectItem>
+                          <SelectItem value="single_select" className="rounded-xl px-4 py-3 text-sm focus:bg-zinc-100 dark:focus:bg-zinc-900 cursor-pointer text-zinc-950 dark:text-zinc-50 focus:text-zinc-950 dark:focus:text-zinc-50">Single Select</SelectItem>
+                          <SelectItem value="multi_select" className="rounded-xl px-4 py-3 text-sm focus:bg-zinc-100 dark:focus:bg-zinc-900 cursor-pointer text-zinc-950 dark:text-zinc-50 focus:text-zinc-950 dark:focus:text-zinc-50">Multi Select</SelectItem>
+                          <SelectItem value="rating" className="rounded-xl px-4 py-3 text-sm focus:bg-zinc-100 dark:focus:bg-zinc-900 cursor-pointer text-zinc-950 dark:text-zinc-50 focus:text-zinc-950 dark:focus:text-zinc-50">Rating (1-5)</SelectItem>
+                          <SelectItem value="date" className="rounded-xl px-4 py-3 text-sm focus:bg-zinc-100 dark:focus:bg-zinc-900 cursor-pointer text-zinc-950 dark:text-zinc-50 focus:text-zinc-950 dark:focus:text-zinc-50">Date</SelectItem>
                         </SelectContent>
                       </Select>
 
                       <label className="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-950 cursor-pointer select-none">
                         <input
-                          type="checkbox"
-                          checked={field.required}
-                          onChange={(e) => {
-                            updateFieldMutation.mutateAsync({
-                              fieldId: field.id,
+                           type="checkbox"
+                           checked={field.required}
+                           onChange={(e) => {
+                             updateFieldMutation.mutateAsync({
+                               fieldId: field.id,
 
-                              required: e.target.checked,
-                            });
-                          }}
-                          className="cursor-pointer"
+                               required: e.target.checked,
+                             });
+                           }}
+                           className="cursor-pointer"
                         />
                         Required
                       </label>
                     </div>
 
-                    <div className="mt-7">
+                    {/* DYNAMIC FIELD CONFIGURATIONS */}
+                    <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+                          Placeholder (Optional)
+                        </label>
+                        <input
+                          defaultValue={field.placeholder ?? ''}
+                          placeholder="e.g. Enter your details..."
+                          onBlur={(e) => {
+                            updateFieldMutation.mutateAsync({
+                              fieldId: field.id,
+                              placeholder: e.target.value || null,
+                            });
+                          }}
+                          className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm outline-none transition focus:border-black dark:border-zinc-800 dark:bg-zinc-950 dark:focus:border-white dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+                          Helper Text (Optional)
+                        </label>
+                        <input
+                          defaultValue={field.helperText ?? ''}
+                          placeholder="e.g. Please format as requested..."
+                          onBlur={(e) => {
+                            updateFieldMutation.mutateAsync({
+                              fieldId: field.id,
+                              helperText: e.target.value || null,
+                            });
+                          }}
+                          className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm outline-none transition focus:border-black dark:border-zinc-800 dark:bg-zinc-950 dark:focus:border-white dark:text-white"
+                        />
+                      </div>
+                    </div>
+
+                    {/* SELECT OPTIONS CONFIGURATIONS */}
+                    {(field.type === 'single_select' || field.type === 'multi_select') && (
+                      <div className="mt-4">
+                        <label className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
+                          Options (comma separated list)
+                        </label>
+                        <input
+                          defaultValue={(field.options as string[] | undefined)?.join(', ') ?? 'Option 1, Option 2'}
+                          placeholder="Option 1, Option 2, Option 3"
+                          onBlur={(e) => {
+                            const opts = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                            updateFieldMutation.mutateAsync({
+                              fieldId: field.id,
+                              options: opts.length > 0 ? opts : ['Option 1', 'Option 2'],
+                            });
+                          }}
+                          className="mt-1.5 w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm outline-none transition focus:border-black dark:border-zinc-800 dark:bg-zinc-950 dark:focus:border-white dark:text-white"
+                        />
+                      </div>
+                    )}
+
+                    <div className="mt-7 border-t border-zinc-100 dark:border-zinc-800 pt-5">
+                      <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">Preview Input</p>
                       {field.type === 'short_text' && (
                         <input
                           disabled
-                          placeholder="Short text answer"
+                          placeholder={field.placeholder ?? 'Short text answer'}
                           className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 dark:border-zinc-800 dark:bg-zinc-950 cursor-not-allowed opacity-60"
                         />
                       )}
@@ -387,7 +453,7 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
                       {field.type === 'long_text' && (
                         <textarea
                           disabled
-                          placeholder="Long text answer"
+                          placeholder={field.placeholder ?? 'Long text answer'}
                           className="min-h-[140px] w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 dark:border-zinc-800 dark:bg-zinc-950 cursor-not-allowed opacity-60"
                         />
                       )}
@@ -396,7 +462,7 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
                         <input
                           disabled
                           type="email"
-                          placeholder="Email answer"
+                          placeholder={field.placeholder ?? 'Email answer'}
                           className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 dark:border-zinc-800 dark:bg-zinc-950 cursor-not-allowed opacity-60"
                         />
                       )}
@@ -405,7 +471,42 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
                         <input
                           disabled
                           type="number"
-                          placeholder="Number answer"
+                          placeholder={field.placeholder ?? 'Number answer'}
+                          className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 dark:border-zinc-800 dark:bg-zinc-950 cursor-not-allowed opacity-60"
+                        />
+                      )}
+
+                      {field.type === 'single_select' && (
+                        <div className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 dark:border-zinc-800 dark:bg-zinc-950 cursor-not-allowed opacity-60 text-zinc-400 text-sm">
+                          Dropdown option picker: {(field.options as string[] | undefined)?.join(', ') ?? 'Option 1, Option 2'}
+                        </div>
+                      )}
+
+                      {field.type === 'multi_select' && (
+                        <div className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 dark:border-zinc-800 dark:bg-zinc-950 cursor-not-allowed opacity-60 text-zinc-400 text-sm space-y-1">
+                          Multiple choice checkmarks:
+                          {((field.options as string[] | undefined) ?? ['Option 1', 'Option 2']).map((opt, idx) => (
+                            <div key={idx} className="flex items-center gap-2">
+                              <input type="checkbox" disabled checked={idx === 0} />
+                              <span>{opt}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {field.type === 'rating' && (
+                        <div className="flex items-center gap-2 py-2">
+                          {[1, 2, 3, 4, 5].map((num) => (
+                            <span key={num} className="text-3xl text-zinc-300 dark:text-zinc-700">★</span>
+                          ))}
+                          <span className="text-xs text-zinc-400 ml-2">(1 to 5 Stars scale)</span>
+                        </div>
+                      )}
+
+                      {field.type === 'date' && (
+                        <input
+                          disabled
+                          type="date"
                           className="w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-5 py-4 dark:border-zinc-800 dark:bg-zinc-950 cursor-not-allowed opacity-60"
                         />
                       )}
@@ -532,7 +633,7 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
                       <span>{field.required ? 'Required' : 'Optional'}</span>
                     </div>
 
-                    {field.type === 'number' ? (
+                    {field.type === 'number' || field.type === 'rating' ? (
                       (() => {
                         const stats = getNumberStats(field.id);
                         return (

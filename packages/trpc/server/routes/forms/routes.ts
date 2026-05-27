@@ -61,7 +61,16 @@ export const formsRouter = router({
       z.object({
         formId: z.string().uuid(),
 
-        type: z.enum(['short_text', 'long_text', 'email', 'number']),
+        type: z.enum([
+          'short_text',
+          'long_text',
+          'email',
+          'number',
+          'single_select',
+          'multi_select',
+          'rating',
+          'date',
+        ]),
 
         label: z.string().min(1).max(200),
 
@@ -86,8 +95,20 @@ export const formsRouter = router({
 
         label: z.string().min(1).max(200).optional(),
 
-        type: z.enum(['short_text', 'long_text', 'email', 'number']).optional(),
+        type: z.enum([
+          'short_text',
+          'long_text',
+          'email',
+          'number',
+          'single_select',
+          'multi_select',
+          'rating',
+          'date',
+        ]).optional(),
         required: z.boolean().optional(),
+        options: z.array(z.string()).nullable().optional(),
+        placeholder: z.string().nullable().optional(),
+        helperText: z.string().nullable().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {

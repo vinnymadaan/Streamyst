@@ -7,7 +7,15 @@ import { forms, formFields } from '@repo/database/src/schema';
 interface CreateFieldInput {
   formId: string;
 
-  type: 'short_text' | 'long_text' | 'email' | 'number';
+  type:
+    | 'short_text'
+    | 'long_text'
+    | 'email'
+    | 'number'
+    | 'single_select'
+    | 'multi_select'
+    | 'rating'
+    | 'date';
 
   label: string;
 
@@ -39,6 +47,8 @@ export async function createField(input: CreateFieldInput, userId: string) {
       required: false,
 
       fieldOrder: input.fieldOrder,
+
+      options: input.type === 'single_select' || input.type === 'multi_select' ? ['Option 1', 'Option 2'] : null,
     })
     .returning();
 
