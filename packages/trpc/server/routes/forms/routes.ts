@@ -37,9 +37,10 @@ export const formsRouter = router({
       try {
         return await createForm(ctx.user.id, input);
       } catch (error) {
+        console.error('CREATE FORM ERROR:', error);
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to create form',
+          message: error instanceof Error ? error.message : 'Failed to create form',
         });
       }
     }),

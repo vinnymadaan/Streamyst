@@ -4,7 +4,7 @@ import { db } from "@repo/database/src/client";
 import { forms } from "@repo/database/src/schema/forms";
 import { formFields } from "@repo/database/src/schema/form-fields";
 
-import { createFormSchema } from "@repo/database/src/schema/forms";
+import { createFormSchema } from "@repo/schemas";
 
 type CreateFormInput = z.infer<typeof createFormSchema>;
 
