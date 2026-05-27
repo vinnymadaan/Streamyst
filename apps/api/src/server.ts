@@ -16,7 +16,7 @@ import { tr } from "zod/v4/locales";
 export const app = express();
 
 
-if (env.NODE_ENV !== "prod") {
+
   app.use(
     cors({
       origin: ['https://streamyst-web.vercel.app'],
@@ -24,7 +24,7 @@ if (env.NODE_ENV !== "prod") {
       credentials: true,
     })
   );
-}
+
 
 app.use(cookieParser());
 app.use(express.json());
