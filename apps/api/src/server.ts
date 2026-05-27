@@ -87,8 +87,8 @@ app.get("/auth/google/callback", async (req, res) => {
       result.session.sessionToken,
       {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax",
+        secure: true,
+        sameSite: "none",
         maxAge: 1000 * 60 * 60 * 24 * 30,
         path: "/"
       },
