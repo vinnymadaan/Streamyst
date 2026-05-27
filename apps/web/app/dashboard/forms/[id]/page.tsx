@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 
 import { CheckCircle2, Copy, Eye, Plus, Trash2 } from 'lucide-react';
 
@@ -39,6 +39,41 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
   const { data: responses = [] } = trpc.forms.getResponses.useQuery({
     formId: id,
   });
+
+  const [activeTab, setActiveTab] = useState<'responses' | 'analytics'>('responses');
+
+  const getNumberStats = (fieldId: string) => {
+    const values: number[] = [];
+    for (const r of responses as any[]) {
+      const ans = r.answers?.find((a: any) => a.field?.id === fieldId);
+      if (ans) {
+        const val = parseFloat(ans.value);
+        if (!isNaN(val)) {
+          values.push(val);
+        }
+      }
+    }
+
+    if (values.length === 0) return { avg: 0, min: 0, max: 0, total: 0 };
+
+    const sum = values.reduce((s: number, val: number) => s + val, 0);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const avg = parseFloat((sum / values.length).toFixed(2));
+
+    return { avg, min, max, total: values.length };
+  };
+
+  const getFieldAnswers = (fieldId: string): string[] => {
+    const answers: string[] = [];
+    for (const r of responses as any[]) {
+      const ans = r.answers?.find((a: any) => a.field?.id === fieldId);
+      if (ans && ans.value !== null && ans.value !== undefined && ans.value.trim() !== '') {
+        answers.push(ans.value);
+      }
+    }
+    return answers;
+  };
 
   const createFieldMutation = trpc.forms.createField.useMutation({
     onSuccess: async () => {
@@ -393,22 +428,47 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
           )}
         </div>
 
-        {/* RESPONSES */}
+        {/* SUBMISSIONS & ANALYTICS */}
         <div className="mt-12 rounded-[32px] border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-100 dark:border-zinc-800 pb-6">
             <div>
               <h2 className="font-space-grotesk text-4xl font-bold">
-                Responses
+                Submissions
               </h2>
 
-              <p className="mt-3 text-zinc-500 dark:text-zinc-400">
-                View submitted form responses.
+              <p className="mt-2 text-zinc-500 dark:text-zinc-400">
+                View submitted form responses and question-by-question analytics.
               </p>
             </div>
 
-            <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-950">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              {responses.length} responses
+            <div className="flex items-center gap-4">
+              <div className="inline-flex rounded-xl bg-zinc-100 p-1 dark:bg-zinc-950 border border-zinc-200/30">
+                <button
+                  onClick={() => setActiveTab('responses')}
+                  className={`rounded-lg px-4 py-2 text-xs font-semibold transition select-none cursor-pointer ${
+                    activeTab === 'responses'
+                      ? 'bg-white text-zinc-950 shadow-sm dark:bg-zinc-900 dark:text-white'
+                      : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  }`}
+                >
+                  All Responses
+                </button>
+                <button
+                  onClick={() => setActiveTab('analytics')}
+                  className={`rounded-lg px-4 py-2 text-xs font-semibold transition select-none cursor-pointer ${
+                    activeTab === 'analytics'
+                      ? 'bg-white text-zinc-950 shadow-sm dark:bg-zinc-900 dark:text-white'
+                      : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  }`}
+                >
+                  Analytics Insights
+                </button>
+              </div>
+
+              <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-zinc-50 px-4 py-2 text-sm dark:border-zinc-800 dark:bg-zinc-950 select-none">
+                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                {responses.length} responses
+              </div>
             </div>
           </div>
 
@@ -416,7 +476,7 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
             <div className="mt-10 rounded-[28px] border border-dashed border-zinc-300 p-16 text-center dark:border-zinc-800">
               <p className="text-zinc-500">No responses yet.</p>
             </div>
-          ) : (
+          ) : activeTab === 'responses' ? (
             <div className="mt-10 space-y-5">
               {(responses as any[]).map((response) => (
                 <div
@@ -446,6 +506,68 @@ export default function FormEditorPage({ params }: FormEditorPageProps) {
                   </div>
                 </div>
               ))}
+            </div>
+          ) : (
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
+              {form.fields.map((field) => {
+                const answers = getFieldAnswers(field.id);
+                
+                return (
+                  <div
+                    key={field.id}
+                    className="rounded-[28px] border border-zinc-200 p-6 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <h4 className="font-space-grotesk text-xl font-bold truncate max-w-[70%]" title={field.label}>
+                        {field.label}
+                      </h4>
+                      <span className="rounded-full bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-500 capitalize whitespace-nowrap">
+                        {field.type.replace('_', ' ')}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 flex items-center gap-2 text-sm text-zinc-500">
+                      <span>{answers.length} responses</span>
+                      <span>•</span>
+                      <span>{field.required ? 'Required' : 'Optional'}</span>
+                    </div>
+
+                    {field.type === 'number' ? (
+                      (() => {
+                        const stats = getNumberStats(field.id);
+                        return (
+                          <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+                            <div className="rounded-2xl bg-white dark:bg-zinc-950 p-3 border border-zinc-100 dark:border-zinc-900 shadow-sm">
+                              <p className="text-xs text-zinc-500">Average</p>
+                              <p className="mt-1.5 font-space-grotesk text-2xl font-bold text-orange-500">{stats.avg}</p>
+                            </div>
+                            <div className="rounded-2xl bg-white dark:bg-zinc-950 p-3 border border-zinc-100 dark:border-zinc-900 shadow-sm">
+                              <p className="text-xs text-zinc-500">Min</p>
+                              <p className="mt-1.5 font-space-grotesk text-2xl font-bold">{stats.min}</p>
+                            </div>
+                            <div className="rounded-2xl bg-white dark:bg-zinc-950 p-3 border border-zinc-100 dark:border-zinc-900 shadow-sm">
+                              <p className="text-xs text-zinc-500">Max</p>
+                              <p className="mt-1.5 font-space-grotesk text-2xl font-bold">{stats.max}</p>
+                            </div>
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <div className="mt-6 space-y-2 max-h-48 overflow-y-auto pr-1">
+                        {answers.length === 0 ? (
+                          <p className="text-sm text-zinc-400 italic">No answers submitted yet.</p>
+                        ) : (
+                          answers.map((ans, idx) => (
+                            <div key={idx} className="rounded-xl bg-white dark:bg-zinc-950 px-4 py-3 text-sm border border-zinc-100 dark:border-zinc-900 shadow-sm leading-6 break-words">
+                              {ans}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
