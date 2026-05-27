@@ -28,7 +28,7 @@ export default function HomePage() {
             </a>
 
             <a
-              href="http://localhost:8000/auth/google"
+              href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google`}
               className="rounded-full bg-zinc-950 px-5 py-2 text-sm font-medium text-white transition hover:opacity-90 dark:bg-white dark:text-black"
             >
               Get Started
@@ -76,7 +76,7 @@ export default function HomePage() {
 
             <div className="mt-10 flex flex-wrap items-center gap-4">
               <a
-                href="http://localhost:8000/auth/google"
+                href={`${process.env.NEXT_PUBLIC_API_URL}/auth/google`}
                 className="rounded-2xl bg-zinc-950 px-7 py-4 text-sm font-semibold text-white transition hover:scale-[1.02] hover:opacity-90 dark:bg-white dark:text-black"
               >
                 Start Building
