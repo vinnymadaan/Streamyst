@@ -94,7 +94,7 @@ app.get("/auth/google/callback", async (req, res) => {
       },
     );
 
-    return res.redirect("http://localhost:3000/dashboard")
+    return res.redirect('https://streamyst-web.vercel.app/dashboard');
   } catch (error) {
   console.error("GOOGLE CALLBACK ERROR:");
   console.error(error);
